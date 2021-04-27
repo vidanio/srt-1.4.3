@@ -530,13 +530,22 @@ int SrtSource::Read(size_t chunk, MediaPacket& pkt, ostream &out_stats)
     if (need_bw_report || need_stats_report)
     {
         CBytePerfMon perf;
-        srt_bstats(m_sock, &perf, need_stats_report && !transmit_total_stats);
+        srt_bstats(m_sock, &perf, false && !transmit_total_stats);
         if (transmit_stats_writer != nullptr) 
         {
-            if (need_bw_report)
-                cerr << transmit_stats_writer->WriteBandwidth(perf.mbpsBandwidth) << std::flush;
-            if (need_stats_report)
-                out_stats << transmit_stats_writer->WriteStats(m_sock, perf) << std::flush;
+            using namespace std::chrono;
+            time_point eop = steady_clock::now();
+            auto dur = duration_cast<microseconds>(eop - start_time);
+            int64_t secondscount = duration_cast<seconds>(dur).count();
+
+            if (secondscount_old != secondscount){
+                srt_bstats(m_sock, &perf, true && !transmit_total_stats);
+                if (need_bw_report)
+                    cerr << transmit_stats_writer->WriteBandwidth(perf.mbpsBandwidth) << std::flush;
+                if (need_stats_report)
+                    out_stats << transmit_stats_writer->WriteStats(m_sock, perf) << std::flush;
+            }
+            secondscount_old = secondscount;
         }
     }
     ++counter;
@@ -579,13 +588,22 @@ int SrtTarget::Write(const char* data, size_t size, int64_t src_time, ostream &o
     if (need_bw_report || need_stats_report)
     {
         CBytePerfMon perf;
-        srt_bstats(m_sock, &perf, need_stats_report && !transmit_total_stats);
+        srt_bstats(m_sock, &perf, false && !transmit_total_stats);
         if (transmit_stats_writer != nullptr)
         {
-            if (need_bw_report)
-                cerr << transmit_stats_writer->WriteBandwidth(perf.mbpsBandwidth) << std::flush;
-            if (need_stats_report)
-                out_stats << transmit_stats_writer->WriteStats(m_sock, perf) << std::flush;
+            using namespace std::chrono;
+            time_point eop = steady_clock::now();
+            auto dur = duration_cast<microseconds>(eop - start_time);
+            int64_t secondscount = duration_cast<seconds>(dur).count();
+
+            if (secondscount_old != secondscount){
+                srt_bstats(m_sock, &perf, true && !transmit_total_stats);
+                if (need_bw_report)
+                    cerr << transmit_stats_writer->WriteBandwidth(perf.mbpsBandwidth) << std::flush;
+                if (need_stats_report)
+                    out_stats << transmit_stats_writer->WriteStats(m_sock, perf) << std::flush;
+            }
+            secondscount_old = secondscount;
         }
     }
     ++counter;

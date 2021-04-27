@@ -580,9 +580,9 @@ public:
         // Header
         if (!first_line_printed)
         {
-#ifdef HAS_PUT_TIME
-            output << "Timepoint,";
-#endif
+// #ifdef HAS_PUT_TIME
+//             output << "Timepoint,";
+// #endif
             output << "Time,SocketID";
 
             for (auto& i: g_SrtStatsTable)
@@ -594,12 +594,13 @@ public:
         }
 
         // Values
-#ifdef HAS_PUT_TIME
+// #ifdef HAS_PUT_TIME
         // HDR: Timepoint
-        output << print_timestamp() << ",";
-#endif // HAS_PUT_TIME
+        // output << print_timestamp() << ",";
+// #endif // HAS_PUT_TIME
 
         // HDR: Time,SocketID
+        output << "STATS=>";
         output << mon.msTimeStamp << "," << sid;
 
         // HDR: the loop of all values in g_SrtStatsTable
